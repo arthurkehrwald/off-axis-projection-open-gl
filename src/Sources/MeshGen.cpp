@@ -1,6 +1,6 @@
 #include "MeshGen.h"
 
-static void MeshGen::addQuadToMesh(
+void MeshGen::addQuadToMesh(
 	const glm::vec3& a,
 	const glm::vec3& b,
 	const glm::vec3& c,
