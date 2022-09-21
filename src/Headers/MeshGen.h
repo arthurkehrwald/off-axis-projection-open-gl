@@ -16,7 +16,7 @@ namespace MeshGen
 		const glm::vec4& UVs,
 		std::vector<float>& meshCoords,
 		std::vector<int>& meshIndices);
-	Mesh createCubeMesh();
+	Mesh createCubeMesh(bool invertNormals = false);
 	Mesh createTriangleMesh();
 	Mesh createQuadMesh();
 }

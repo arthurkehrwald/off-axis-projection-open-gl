@@ -44,5 +44,5 @@ glm::mat4 OffAxisProjection::offAxisFrustum(const glm::vec3& viewPos, const glm:
 	viewOffset[3][1] = -viewPos.y;
 	viewOffset[3][2] = -viewPos.z;
 
-	return projection * projectionPlaneOrientation * viewOffset;
+	return projection * projectionPlaneOrientation;	
 }

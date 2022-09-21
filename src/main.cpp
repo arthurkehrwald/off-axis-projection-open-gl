@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "MeshGen.h"
 #include "MatrixUtils.h"
+#include "OffAxisProjection.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -18,7 +19,7 @@ int main(void)
 	if (!glfwInit())
 		return -1;
 
-	window = glfwCreateWindow(640, 480, "OpenGL Template", NULL, NULL);	
+	window = glfwCreateWindow(640, 640, "OpenGL Template", NULL, NULL);	
 
 	if (!window)
 	{
@@ -35,43 +36,37 @@ int main(void)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-	ShaderProgram shaderProgram("./Assets/Shaders/Standard.vert",
-		"./Assets/Shaders/UnlitTextured.frag");
-	shaderProgram.activate();
-	
-	std::vector<glm::mat4> cubeModelMats = std::vector<glm::mat4>();
+		
+	Mesh skyboxMesh = MeshGen::createCubeMesh(true);
+	glm::mat4 skyboxModelMat = MatrixUtils::createTransformation(
+		glm::vec3(0.0f),
+		glm::vec3(0.0f),
+		glm::vec3(1.0f) * 100.0f
+	);
 
+	Mesh cubeMesh = MeshGen::createCubeMesh();
 	glm::mat4 cubeModelMat = MatrixUtils::createTransformation(
-		glm::vec3(0.0f, 0.0f, 5.0f),
+		glm::vec3(0.0f, 0.0f, 10.0f),
 		glm::vec3(-15.0f, 45.0f, 0.0f),
 		glm::vec3(1.0f, 1.0f, 1.0f)
 	);
 
-	glm::mat4 screenModelMat = MatrixUtils::createTransformation(
-		glm::vec3(0.0f, 0.0f, 1.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(1.0f, 1.0f, 1.0f)
-	);
-	glm::vec3 screenBL = screenModelMat * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f);
-	glm::vec3 screenBR = screenModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f);
-	glm::vec3 screenTL = screenModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f);
+	Mesh screenMesh = MeshGen::createQuadMesh();
+
+	ShaderProgram shaderProgram("./Assets/Shaders/Standard.vert",
+		"./Assets/Shaders/UnlitTextured.frag");
+	shaderProgram.activate();
+
+	Texture checkerboardTexture("./Assets/Textures/checkerboard.png", GL_RGB);
+	checkerboardTexture.activate(0);
+	shaderProgram.setUniform("DiffuseTexture", 0);
+	shaderProgram.setUniform("TintColor", glm::vec4(1.0f));
 
 	glm::vec3 viewPoint = glm::vec3(0.0f, 0.0f, -5.0f);
 	glm::vec3 viewFwd = glm::vec3(0.0f, 0.0f, 1.0f);
 	glm::vec3 viewUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::mat4 viewMat = glm::lookAt(viewPoint, viewPoint + viewFwd, viewUp);
 	shaderProgram.setUniform("View", viewMat);
-
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 300.0f);
-	shaderProgram.setUniform("Projection", projection);
-
-	Texture checkerboardTexture("./Assets/Textures/checkerboard.png", GL_RGB);
-	checkerboardTexture.activate(0);
-	shaderProgram.setUniform("DiffuseTexture", 0);
-	shaderProgram.setUniform("TintColor", glm::vec4(1.0f));
-		
-	Mesh cubeMesh = MeshGen::createCubeMesh();
-	Mesh screenMesh = MeshGen::createQuadMesh();
 
 	float timeAtPreviousFrame = glfwGetTime();
 
@@ -82,12 +77,30 @@ int main(void)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		skyboxMesh.activate();
+		shaderProgram.setUniform("Model", skyboxModelMat);
+		shaderProgram.setUniform("TintColor", glm::vec4(0.5f, 0.5f, 0.5f, 1.0f));
+		skyboxMesh.draw();
+
 		cubeMesh.activate();
 		shaderProgram.setUniform("Model", cubeModelMat);
 		shaderProgram.setUniform("TintColor", glm::vec4(1.0f));
 		cubeMesh.draw();
 
 		screenMesh.activate();
+		glm::vec3 pos = glm::vec3(0.0f, 0.0f, 3.0f);
+		glm::vec3 rot = glm::vec3(0.0f);
+		rot.y = glm::sin(timeAtPreviousFrame) * 45.0f;
+		glm::vec3 scale = glm::vec3(1.0f);
+		glm::mat4 screenModelMat = MatrixUtils::createTransformation(pos, rot, scale);
+
+		glm::vec3 screenBL = viewMat * screenModelMat * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f);
+		glm::vec3 screenBR = viewMat * screenModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f);
+		glm::vec3 screenTL = viewMat * screenModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f);
+
+		glm::mat4 projection = OffAxisProjection::offAxisFrustum(glm::vec3(0.0f), screenBL, screenBR, screenTL, 0.1f, 20.0f);
+		shaderProgram.setUniform("Projection", projection);
+
 		shaderProgram.setUniform("Model", screenModelMat);
 		shaderProgram.setUniform("TintColor", glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
 		screenMesh.draw();

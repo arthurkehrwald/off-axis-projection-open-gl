@@ -54,7 +54,7 @@ void MeshGen::addQuadToMesh(
 	}
 }
 
-Mesh MeshGen::createCubeMesh()
+Mesh MeshGen::createCubeMesh(bool invertNormals)
 {
 	std::vector<float> meshCoords;
 	std::vector<int> meshIndices;
@@ -71,13 +71,17 @@ Mesh MeshGen::createCubeMesh()
 
 	const auto texCoords = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
+	const auto left = glm::vec3(1.0f, 0.0f, 0.0f);
+	const auto up = glm::vec3(0.0f, 1.0f, 0.0f);
+	const auto forward = glm::vec3(0.0f, 0.0f, 1.0f);
+
 	// Sides
-	addQuadToMesh(topA, topB, topC, topD, false, glm::vec3(0.0f, 1.0f, 0.0f), texCoords, meshCoords, meshIndices);
-	addQuadToMesh(topA, topB, botA, botB, true, glm::vec3(0.0f, 0.0f, 1.0f), texCoords, meshCoords, meshIndices);
-	addQuadToMesh(topC, topD, botC, botD, false, glm::vec3(0.0f, 0.0f, -1.0f), texCoords, meshCoords, meshIndices);
-	addQuadToMesh(topA, topC, botA, botC, false, glm::vec3(1.0f, 0.0f, 0.0f), texCoords, meshCoords, meshIndices);
-	addQuadToMesh(topB, topD, botB, botD, true, glm::vec3(-1.0f, 0.0f, 0.0f), texCoords, meshCoords, meshIndices);
-	addQuadToMesh(botA, botB, botC, botD, true, glm::vec3(0.0f, -1.0f, 0.0f), texCoords, meshCoords, meshIndices);
+	addQuadToMesh(topA, topB, topC, topD, invertNormals, invertNormals ? -up : up, texCoords, meshCoords, meshIndices);
+	addQuadToMesh(topA, topB, botA, botB, !invertNormals, invertNormals ? -forward : forward, texCoords, meshCoords, meshIndices);
+	addQuadToMesh(topC, topD, botC, botD, invertNormals, invertNormals ? forward : -forward, texCoords, meshCoords, meshIndices);
+	addQuadToMesh(topA, topC, botA, botC, invertNormals, invertNormals ? -left : left, texCoords, meshCoords, meshIndices);
+	addQuadToMesh(topB, topD, botB, botD, !invertNormals, invertNormals ? left : -left, texCoords, meshCoords, meshIndices);
+	addQuadToMesh(botA, botB, botC, botD, !invertNormals, invertNormals ? up : -up, texCoords, meshCoords, meshIndices);
 
 	return Mesh(meshCoords, Mesh::VertexArrayFormat::posNormalUV, meshIndices);
 }
