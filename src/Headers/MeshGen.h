@@ -18,4 +18,5 @@ namespace MeshGen
 		std::vector<int>& meshIndices);
 	Mesh createCubeMesh();
 	Mesh createTriangleMesh();
+	Mesh createQuadMesh();
 }

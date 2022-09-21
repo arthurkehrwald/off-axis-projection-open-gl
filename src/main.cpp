@@ -1,11 +1,15 @@
 #pragma once
 #include "ShaderProgram.h"
 #include "Texture.h"
+#include "Mesh.h"
 #include "MeshGen.h"
+#include "MatrixUtils.h"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <vector>
 
 int main(void)
 {
@@ -27,18 +31,32 @@ int main(void)
 	fprintf(stderr, "OpenGL %s\n", glGetString(GL_VERSION));
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
 	ShaderProgram shaderProgram("./Assets/Shaders/Standard.vert",
 		"./Assets/Shaders/UnlitTextured.frag");
 	shaderProgram.activate();
 	
-	glm::mat4 modelMat = glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 5.0f));
-	modelMat = glm::rotate(modelMat, glm::radians(-25.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	modelMat = glm::rotate(modelMat, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	shaderProgram.setUniform("Model", modelMat);
+	std::vector<glm::mat4> cubeModelMats = std::vector<glm::mat4>();
 
-	glm::vec3 viewPoint = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::mat4 cubeModelMat = MatrixUtils::createTransformation(
+		glm::vec3(0.0f, 0.0f, 5.0f),
+		glm::vec3(-15.0f, 45.0f, 0.0f),
+		glm::vec3(1.0f, 1.0f, 1.0f)
+	);
+
+	glm::mat4 screenModelMat = MatrixUtils::createTransformation(
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 1.0f, 1.0f)
+	);
+	glm::vec3 screenBL = screenModelMat * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f);
+	glm::vec3 screenBR = screenModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f);
+	glm::vec3 screenTL = screenModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f);
+
+	glm::vec3 viewPoint = glm::vec3(0.0f, 0.0f, -5.0f);
 	glm::vec3 viewFwd = glm::vec3(0.0f, 0.0f, 1.0f);
 	glm::vec3 viewUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::mat4 viewMat = glm::lookAt(viewPoint, viewPoint + viewFwd, viewUp);
@@ -50,9 +68,10 @@ int main(void)
 	Texture checkerboardTexture("./Assets/Textures/checkerboard.png", GL_RGB);
 	checkerboardTexture.activate(0);
 	shaderProgram.setUniform("DiffuseTexture", 0);
+	shaderProgram.setUniform("TintColor", glm::vec4(1.0f));
 		
-	Mesh mesh = MeshGen::createCubeMesh();
-	mesh.activate();
+	Mesh cubeMesh = MeshGen::createCubeMesh();
+	Mesh screenMesh = MeshGen::createQuadMesh();
 
 	float timeAtPreviousFrame = glfwGetTime();
 
@@ -61,12 +80,17 @@ int main(void)
 		float deltaTime = glfwGetTime() - timeAtPreviousFrame;
 		timeAtPreviousFrame = glfwGetTime();
 
-		modelMat = glm::rotate(modelMat, glm::radians(45.0f * deltaTime), glm::vec3(0.0f, 1.0f, 0.0f));
-		shaderProgram.setUniform("Model", modelMat);
-
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		mesh.draw();
+		cubeMesh.activate();
+		shaderProgram.setUniform("Model", cubeModelMat);
+		shaderProgram.setUniform("TintColor", glm::vec4(1.0f));
+		cubeMesh.draw();
+
+		screenMesh.activate();
+		shaderProgram.setUniform("Model", screenModelMat);
+		shaderProgram.setUniform("TintColor", glm::vec4(1.0f, 1.0f, 1.0f, 0.5f));
+		screenMesh.draw();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

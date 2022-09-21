@@ -143,6 +143,7 @@
     <ClCompile Include="Dependencies\glm\glm\detail\glm.cpp" />
     <ClCompile Include="Dependencies\stb\stb_define.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Sources\MatrixUtils.cpp" />
     <ClCompile Include="src\Sources\MeshGen.cpp" />
     <ClCompile Include="src\Sources\OffAxisProjection.cpp" />
     <ClCompile Include="src\Sources\ShaderProgram.cpp" />
@@ -399,6 +400,7 @@
     <ClInclude Include="Dependencies\glm\glm\vec4.hpp" />
     <ClInclude Include="Dependencies\glm\glm\vector_relational.hpp" />
     <ClInclude Include="Dependencies\stb\stb_image.h" />
+    <ClInclude Include="src\Headers\MatrixUtils.h" />
     <ClInclude Include="src\Headers\Mesh.h" />
     <ClInclude Include="src\Headers\MeshGen.h" />
     <ClInclude Include="src\Headers\OffAxisProjection.h" />

@@ -95,3 +95,18 @@ Mesh MeshGen::createTriangleMesh()
 
 	return Mesh(vertices, Mesh::VertexArrayFormat::posNormalUV, indices);
 }
+
+Mesh MeshGen::createQuadMesh()
+{
+	glm::vec3 tlPos = glm::vec3(0.5f, 0.5f, 0.0f);
+	glm::vec3 trPos = glm::vec3(-0.5f, 0.5f, 0.0f);
+	glm::vec3 blPos = glm::vec3(0.5f, -0.5f, 0.0f);
+	glm::vec3 brPos = glm::vec3(-0.5f, -0.5f, 0.0f);
+	bool invertVertexOrder = false;
+	glm::vec3 normal = glm::vec3(0.0f, 0.0f, -1.0f);
+	const auto texCoords = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+	std::vector<float> meshCoords;
+	std::vector<int> meshIndices;
+	addQuadToMesh(tlPos, trPos, blPos, brPos, invertVertexOrder, normal, texCoords, meshCoords, meshIndices);
+	return Mesh(meshCoords, Mesh::VertexArrayFormat::posNormalUV, meshIndices);
+}
