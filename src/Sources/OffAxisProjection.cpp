@@ -39,10 +39,5 @@ glm::mat4 OffAxisProjection::offAxisFrustum(const glm::vec3& viewPos, const glm:
 	projectionPlaneOrientation[2][2] = screenFwdDir.z;
 	projectionPlaneOrientation[3][3] = 1.0f;
 
-	glm::mat4 viewOffset = glm::mat4();
-	viewOffset[3][0] = -viewPos.x;
-	viewOffset[3][1] = -viewPos.y;
-	viewOffset[3][2] = -viewPos.z;
-
 	return projection * projectionPlaneOrientation;	
 }
