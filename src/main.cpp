@@ -98,7 +98,7 @@ int main(void)
 		glm::vec3 screenBR = viewMat * screenModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f);
 		glm::vec3 screenTL = viewMat * screenModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f);
 
-		glm::mat4 projection = OffAxisProjection::offAxisFrustum(glm::vec3(0.0f), screenBL, screenBR, screenTL, 0.1f, 20.0f);
+		glm::mat4 projection = OffAxisProjection::offAxisFrustum(screenBL, screenBR, screenTL, 0.1f, 20.0f);
 		shaderProgram.setUniform("Projection", projection);
 
 		shaderProgram.setUniform("Model", screenModelMat);

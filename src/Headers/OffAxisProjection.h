@@ -4,5 +4,5 @@
 
 namespace OffAxisProjection
 {
-	glm::mat4 offAxisFrustum(const glm::vec3& viewPos, const glm::vec3 screenBL, const glm::vec3 screenBR, const glm::vec3 screenTL, float nearDist, float farDist);
+	glm::mat4 offAxisFrustum(const glm::vec3 screenBL_VS, const glm::vec3 screenBR_VS, const glm::vec3 screenTL_VS, float nearDist, float farDist);
 }
