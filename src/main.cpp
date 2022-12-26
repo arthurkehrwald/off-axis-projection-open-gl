@@ -46,7 +46,7 @@ int main(void)
 
 	Mesh cubeMesh = MeshGen::createCubeMesh();
 	glm::mat4 cubeModelMat = MatrixUtils::createTransformation(
-		glm::vec3(0.0f, 0.0f, 10.0f),
+		glm::vec3(0.0f, 0.0f, 5.0f),
 		glm::vec3(-15.0f, 45.0f, 0.0f),
 		glm::vec3(1.0f, 1.0f, 1.0f)
 	);
@@ -88,9 +88,16 @@ int main(void)
 		cubeMesh.draw();
 
 		screenMesh.activate();
+
+		viewPoint = glm::vec3(1.0f, 0.0f, -5.0f);
+		viewPoint.y = glm::sin(timeAtPreviousFrame) * 0.5f;
+		viewMat = glm::lookAt(viewPoint, viewPoint + viewFwd, viewUp);
+		shaderProgram.setUniform("View", viewMat);
+
 		glm::vec3 pos = glm::vec3(0.0f, 0.0f, 3.0f);
+		pos.x = glm::sin(timeAtPreviousFrame) * .5f;
 		glm::vec3 rot = glm::vec3(0.0f);
-		rot.y = glm::sin(timeAtPreviousFrame) * 45.0f;
+		//rot.y = glm::sin(timeAtPreviousFrame) * 45.0f;
 		glm::vec3 scale = glm::vec3(1.0f);
 		glm::mat4 screenModelMat = MatrixUtils::createTransformation(pos, rot, scale);
 
