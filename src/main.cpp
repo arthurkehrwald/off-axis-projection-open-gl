@@ -89,23 +89,28 @@ int main(void)
 
 		screenMesh.activate();
 
-		viewPoint = glm::vec3(1.0f, 0.0f, -5.0f);
-		viewPoint.y = glm::sin(timeAtPreviousFrame) * 0.5f;
-		viewMat = glm::lookAt(viewPoint, viewPoint + viewFwd, viewUp);
-		shaderProgram.setUniform("View", viewMat);
-
 		glm::vec3 pos = glm::vec3(0.0f, 0.0f, 3.0f);
-		pos.x = glm::sin(timeAtPreviousFrame) * .5f;
+		//pos.x = glm::sin(timeAtPreviousFrame) * .5f;
 		glm::vec3 rot = glm::vec3(0.0f);
-		//rot.y = glm::sin(timeAtPreviousFrame) * 45.0f;
+
+		rot.y = glm::sin(timeAtPreviousFrame) * 45.0f;
 		glm::vec3 scale = glm::vec3(1.0f);
 		glm::mat4 screenModelMat = MatrixUtils::createTransformation(pos, rot, scale);
 
-		glm::vec3 screenBL = viewMat * screenModelMat * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f);
-		glm::vec3 screenBR = viewMat * screenModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f);
-		glm::vec3 screenTL = viewMat * screenModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f);
+		glm::vec3 screenBL_WS = screenModelMat * glm::vec4(0.5f, -0.5f, 0.0f, 1.0f);
+		glm::vec3 screenBR_WS = screenModelMat * glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f);
+		glm::vec3 screenTL_WS = screenModelMat * glm::vec4(0.5f, 0.5f, 0.0f, 1.0f);
 
-		glm::mat4 projection = OffAxisProjection::offAxisFrustum(screenBL, screenBR, screenTL, 0.1f, 20.0f);
+		viewPoint = glm::vec3(1.0f, 0.0f, -5.0f);
+		//viewPoint.y = glm::sin(timeAtPreviousFrame) * 0.5f;
+		viewMat = OffAxisProjection::offAxisView(viewPoint, screenBL_WS, screenBR_WS, screenTL_WS);
+		shaderProgram.setUniform("View", viewMat);
+
+		glm::vec3 screenBL_VS = viewMat * glm::vec4(screenBL_WS, 1.0f);
+		glm::vec3 screenBR_VS = viewMat * glm::vec4(screenBR_WS, 1.0f);
+		glm::vec3 screenTL_VS = viewMat * glm::vec4(screenTL_WS, 1.0f);
+
+		glm::mat4 projection = OffAxisProjection::offAxisFrustum(screenBL_VS, screenBR_VS, screenTL_VS, 0.1f, 20.0f);
 		shaderProgram.setUniform("Projection", projection);
 
 		shaderProgram.setUniform("Model", screenModelMat);

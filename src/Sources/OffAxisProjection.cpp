@@ -22,19 +22,15 @@ glm::mat4 OffAxisProjection::offAxisFrustum(const glm::vec3 screenBL_VS, const g
 	float screenOriginToTopEdgeDist = glm::dot(screenUpDir, screenTL_VS) * nearDist / viewToScreenOriginDist;
 	float screenOriginToBotEdgeDist = glm::dot(screenUpDir, screenBL_VS) * nearDist / viewToScreenOriginDist;
 
-	glm::mat4 projection = glm::frustum(screenOriginToLeftEdgeDist, screenOriginToRightEdgeDist, screenOriginToBotEdgeDist, screenOriginToTopEdgeDist, nearDist, farDist);
-		
-	glm::mat4 projectionPlaneOrientation = glm::mat4(0.0);
-	projectionPlaneOrientation[0][0] = screenRightDir.x;
-	projectionPlaneOrientation[1][0] = screenRightDir.y;
-	projectionPlaneOrientation[2][0] = screenRightDir.z;
-	projectionPlaneOrientation[0][1] = screenUpDir.x;
-	projectionPlaneOrientation[1][1] = screenUpDir.y;
-	projectionPlaneOrientation[2][1] = screenUpDir.z;
-	projectionPlaneOrientation[0][2] = screenFwdDir.x;
-	projectionPlaneOrientation[1][2] = screenFwdDir.y;
-	projectionPlaneOrientation[2][2] = screenFwdDir.z;
-	projectionPlaneOrientation[3][3] = 1.0f;
+	glm::mat4 projection = glm::frustum(screenOriginToLeftEdgeDist, screenOriginToRightEdgeDist, screenOriginToBotEdgeDist, screenOriginToTopEdgeDist, nearDist, farDist);	
+	return projection;
+}
 
-	return projection * projectionPlaneOrientation;	
+glm::mat4 OffAxisProjection::offAxisView(const glm::vec3 viewPos_WS, const glm::vec3 screenBL_WS, const glm::vec3 screenBR_WS, const glm::vec3 screenTL_WS)
+{
+	glm::vec3 screenRightDir_WS = glm::normalize(screenBR_WS - screenBL_WS);
+	glm::vec3 screenUpDir_WS = glm::normalize(screenTL_WS - screenBL_WS);
+	glm::vec3 screenFwdDir_WS = glm::normalize(glm::cross(screenRightDir_WS, screenUpDir_WS));
+	glm::mat4 viewMat = glm::lookAt(viewPos_WS, viewPos_WS - screenFwdDir_WS, screenUpDir_WS);
+	return viewMat;
 }
